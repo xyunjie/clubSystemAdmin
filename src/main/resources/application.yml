@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/jzx?characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+    hikari:
+      max-lifetime: 180000
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 10MB
+
+app:
+  port: 8080
+
+qiniu:
+  ACCESS_KEY: ZrXQyS_RLjrDkGYk28K4X9xFg4IKzzF922qL3mFF
+  SECRET_KEY: XqqHBq8p09j-Fh8HCKT0J5jZ7mjOTZ-RNx_jM4JG
+  bucketName: xyunjie-blog
+  QINIU_IMAGE_DOMAIN: https://file.xn--8mrz94a38l8mb00n.top/
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*Mapper.xml
+  type-aliases-package: com.club.model
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 开启 SQL 执行日志
+
+
+#knife4j相关配置 可以不用改
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
