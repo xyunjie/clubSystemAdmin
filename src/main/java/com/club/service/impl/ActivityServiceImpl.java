@@ -5,16 +5,14 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.club.common.exception.GlobalException;
-import com.club.entity.domain.Activity;
-import com.club.entity.domain.ActivityUserMap;
-import com.club.entity.domain.ClubUserMap;
-import com.club.entity.domain.User;
+import com.club.entity.domain.*;
 import com.club.entity.dto.ModifyStatusDto;
 import com.club.entity.dto.club.ClubActivityQueryDto;
 import com.club.entity.dto.club.ClubActivitySaveDto;
 import com.club.entity.enums.ActivityStatusEnum;
 import com.club.entity.vo.club.ClubActivityVo;
 import com.club.mapper.ActivityMapper;
+import com.club.mapper.ClubMapper;
 import com.club.mapper.ClubUserMapMapper;
 import com.club.service.ActivityService;
 import com.club.service.ActivityUserMapService;
@@ -46,12 +44,25 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
     @Resource
     private ActivityUserMapService activityUserMapService;
 
+    @Resource
+    private ClubMapper clubMapper;
+
     @Override
     public Page<ClubActivityVo> getClubNoticeList(ClubActivityQueryDto clubActivityQueryDto) {
         LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(clubActivityQueryDto.getId() != null, Activity::getClubId, clubActivityQueryDto.getId());
         queryWrapper.eq(StringUtils.isNotEmpty(clubActivityQueryDto.getKind()), Activity::getKind, clubActivityQueryDto.getKind());
         queryWrapper.eq(clubActivityQueryDto.getStatus() != null, Activity::getStatus, clubActivityQueryDto.getStatus());
+        queryWrapper.like(StringUtils.isNotEmpty(clubActivityQueryDto.getQuery()), Activity::getTitle, clubActivityQueryDto.getQuery());
+        queryWrapper.like(StringUtils.isNotEmpty(clubActivityQueryDto.getQuery()), Activity::getContent, clubActivityQueryDto.getQuery());
+        if (StringUtils.isNotEmpty(clubActivityQueryDto.getQuery())) {
+            LambdaQueryWrapper<Club> clubLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            clubLambdaQueryWrapper.like(Club::getName, clubActivityQueryDto.getQuery());
+            List<Club> clubs = clubMapper.selectList(clubLambdaQueryWrapper);
+            queryWrapper.in(!clubs.isEmpty(), Activity::getClubId, clubs.stream().map(Club::getId).collect(Collectors.toList()));
+            List<User> users = userService.lambdaQuery().like(User::getName, clubActivityQueryDto.getQuery()).list();
+            queryWrapper.in(!users.isEmpty(), Activity::getCreatedBy, users.stream().map(User::getId).collect(Collectors.toList()));
+        }
         queryWrapper.orderByDesc(Activity::getCreatedTime);
         Page<Activity> page = new Page<>(clubActivityQueryDto.getPageNumber(), clubActivityQueryDto.getPageSize());
         this.page(page, queryWrapper);
@@ -61,12 +72,15 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             result.setRecords(new ArrayList<>());
             return result;
         }
+        List<Long> clubIds = page.getRecords().stream().map(Activity::getClubId).distinct().toList();
         List<Long> userIds = page.getRecords().stream().map(Activity::getCreatedBy).distinct().toList();
+        Map<Long, Club> clubMap = clubMapper.selectBatchIds(clubIds).stream().collect(Collectors.toMap(Club::getId, item -> item));
         Map<Long, User> userMap = userService.listByIds(userIds).stream().collect(Collectors.toMap(User::getId, item -> item));
         List<ClubActivityVo> clubActivityVoStream = page.getRecords().stream().map(item -> {
             ClubActivityVo clubActivityVo = new ClubActivityVo();
             BeanUtils.copyProperties(item, clubActivityVo);
             clubActivityVo.setCreatedUser(userMap.get(item.getCreatedBy()));
+            clubActivityVo.setClubName(clubMap.get(item.getClubId()).getName());
             return clubActivityVo;
         }).toList();
         return result.setRecords(clubActivityVoStream);

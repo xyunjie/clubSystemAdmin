@@ -30,6 +30,9 @@ public class ClubActivityVo {
     @Schema(description = "公告发布的社团")
     private Long clubId;
 
+    @Schema(description = "公告发布社团")
+    private String clubName;
+
     @Schema(description = "类型")
     private String kind;
 
@@ -38,6 +41,9 @@ public class ClubActivityVo {
 
     @Schema(description = "是否置顶")
     private Boolean top;
+
+    @Schema(description = "公告状态")
+    private Integer status;
 
     @Schema(description = "公告创建者ID")
     private Long createdBy;
