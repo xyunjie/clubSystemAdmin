@@ -71,6 +71,14 @@ public interface UserService extends IService<User> {
     Page<UserVo> getUserList(UserListQueryDto userListQueryDto);
 
     /**
+     * 获取用户列表
+     *
+     * @param ids
+     * @return
+     */
+    List<UserVo> getUserListByIds(List<Long> ids);
+
+    /**
      * 修改用户状态
      *
      * @param modifyStatusDto

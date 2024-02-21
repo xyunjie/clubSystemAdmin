@@ -6,6 +6,8 @@ import com.club.entity.domain.Activity;
 import com.club.entity.dto.ModifyStatusDto;
 import com.club.entity.dto.club.ClubActivityQueryDto;
 import com.club.entity.dto.club.ClubActivitySaveDto;
+import com.club.entity.dto.club.ClubQueryUserDto;
+import com.club.entity.vo.club.ClubActivityUserVo;
 import com.club.entity.vo.club.ClubActivityVo;
 
 /**
@@ -65,4 +67,11 @@ public interface ActivityService extends IService<Activity> {
      * @param userId
      */
     void removeEntry(Long id, Long userId);
+
+    /**
+     * 获取活动报名成员
+     * @param clubQueryUserDto
+     * @return
+     */
+    Page<ClubActivityUserVo> getActivityUserList(ClubQueryUserDto clubQueryUserDto);
 }

@@ -9,7 +9,10 @@ import com.club.entity.domain.*;
 import com.club.entity.dto.ModifyStatusDto;
 import com.club.entity.dto.club.ClubActivityQueryDto;
 import com.club.entity.dto.club.ClubActivitySaveDto;
+import com.club.entity.dto.club.ClubQueryUserDto;
 import com.club.entity.enums.ActivityStatusEnum;
+import com.club.entity.vo.UserVo;
+import com.club.entity.vo.club.ClubActivityUserVo;
 import com.club.entity.vo.club.ClubActivityVo;
 import com.club.mapper.ActivityMapper;
 import com.club.mapper.ClubMapper;
@@ -174,6 +177,26 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         if (!b) {
             throw new GlobalException("删除失败");
         }
+    }
+
+    @Override
+    public Page<ClubActivityUserVo> getActivityUserList(ClubQueryUserDto clubQueryUserDto) {
+        Page<ActivityUserMap> page = new Page<>();
+        activityUserMapService.lambdaQuery()
+                .eq(ActivityUserMap::getActivityId, clubQueryUserDto.getActivityId()).page(page);
+        List<ActivityUserMap> records = page.getRecords();
+
+        Page<ClubActivityUserVo> result = new Page<>();
+        BeanUtils.copyProperties(page, result, "records");
+        List<Long> userIds = records.stream().map(ActivityUserMap::getUserId).toList();
+        Map<Long, UserVo> collect = userService.getUserListByIds(userIds).stream().collect(Collectors.toMap(UserVo::getId, item -> item));
+        List<ClubActivityUserVo> resultRecords = records.stream().map(item -> {
+            ClubActivityUserVo clubActivityUserVo = new ClubActivityUserVo();
+            BeanUtils.copyProperties(item, clubActivityUserVo);
+            clubActivityUserVo.setUser(collect.get(item.getUserId()));
+            return clubActivityUserVo;
+        }).toList();
+        return result.setRecords(resultRecords);
     }
 }
 

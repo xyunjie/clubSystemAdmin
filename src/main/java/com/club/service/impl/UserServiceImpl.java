@@ -171,23 +171,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.page(page, queryWrapper);
         Page<UserVo> resultPage = new Page<>();
         BeanUtils.copyProperties(page, resultPage, "records");
-        List<Long> dictIds = new ArrayList<>();
-        page.getRecords().forEach(item -> {
-            dictIds.add(item.getCollege());
-            dictIds.add(item.getMajor());
-            dictIds.add(item.getClazz());
-            dictIds.add(item.getGrade());
-        });
-        if (page.getRecords().isEmpty()) {
-            resultPage.setRecords(new ArrayList<>());
-            return resultPage;
-        }
-        // 过滤
-        List<Long> dictIdsFinal = dictIds.stream().filter(Objects::nonNull).distinct().toList();
-        List<Dict> dicts = dictService.listByIds(dictIdsFinal);
-        List<UserVo> list = page.getRecords().stream().map(item -> this.parseUserToUserVo(item, dicts)).toList();
-        resultPage.setRecords(list);
+        List<UserVo> userVos = parseUserListToUserVoList(page.getRecords());
+        resultPage.setRecords(userVos);
         return resultPage;
+    }
+
+    @Override
+    public List<UserVo> getUserListByIds(List<Long> ids) {
+        List<User> users = this.listByIds(ids);
+        if (users.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return parseUserListToUserVoList(users);
     }
 
     @Override
@@ -265,6 +260,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new GlobalException("修改失败！");
         }
     }
+
+    public List<UserVo> parseUserListToUserVoList(List<User> users) {
+        List<Long> dictIds = new ArrayList<>();
+        if (users.isEmpty()) {
+            return new ArrayList<>();
+        }
+        users.forEach(item -> {
+            dictIds.add(item.getCollege());
+            dictIds.add(item.getMajor());
+            dictIds.add(item.getClazz());
+            dictIds.add(item.getGrade());
+        });
+        // 过滤
+        List<Long> dictIdsFinal = dictIds.stream().filter(Objects::nonNull).distinct().toList();
+        List<Dict> dicts = dictService.listByIds(dictIdsFinal);
+        return users.stream().map(item -> this.parseUserToUserVo(item, dicts)).toList();
+     }
 
     @Override
     public UserVo parseUserToUserVo(User user, List<Dict> dicts) {

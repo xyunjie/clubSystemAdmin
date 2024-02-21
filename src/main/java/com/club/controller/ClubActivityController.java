@@ -5,7 +5,8 @@ import com.club.common.result.Result;
 import com.club.entity.dto.ModifyStatusDto;
 import com.club.entity.dto.club.ClubActivityQueryDto;
 import com.club.entity.dto.club.ClubActivitySaveDto;
-import com.club.entity.dto.club.ClubQueryDto;
+import com.club.entity.dto.club.ClubQueryUserDto;
+import com.club.entity.vo.club.ClubActivityUserVo;
 import com.club.entity.vo.club.ClubActivityVo;
 import com.club.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,9 +42,9 @@ public class ClubActivityController extends BaseController {
 
     @PostMapping("/user/list")
     @Operation(summary = "获取活动报名列表")
-    public Result<Page<ClubActivityVo>> getActivityUserList(@RequestBody @Validated ClubQueryDto clubQueryDto) {
-//        Page<ClubActivityVo> res = activityService.getActivityUserList(clubQueryDto);
-        return Result.ok();
+    public Result<Page<ClubActivityUserVo>> getActivityUserList(@RequestBody @Validated ClubQueryUserDto clubQueryUserDto) {
+        Page<ClubActivityUserVo> res = activityService.getActivityUserList(clubQueryUserDto);
+        return Result.ok(res);
     }
 
     @PostMapping("status")
