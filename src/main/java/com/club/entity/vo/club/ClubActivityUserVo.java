@@ -30,8 +30,10 @@ public class ClubActivityUserVo {
     private Integer status;
     @Schema(description = "备注")
     private String remark;
-    @Schema(description = "创建时间")
-    private LocalDateTime createTime;
+    @Schema(description = "开始时间")
+    private LocalDateTime beginTime;
     @Schema(description = "更新时间")
-    private LocalDateTime updateTime;
+    private LocalDateTime endTime;
+    @Schema(description = "报名时间")
+    private LocalDateTime createdTime;
 }

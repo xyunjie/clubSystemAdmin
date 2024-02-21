@@ -133,7 +133,7 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         // 查询活动信息
         Activity activity = this.getById(id);
         LambdaQueryWrapper<ClubUserMap> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ClubUserMap::getClubId, activity.getCreatedBy());
+        queryWrapper.eq(ClubUserMap::getClubId, activity.getClubId());
         queryWrapper.eq(ClubUserMap::getUserId, userId);
         ClubUserMap clubUserMap = clubUserMapMapper.selectOne(queryWrapper);
         if (clubUserMap == null) {
@@ -185,7 +185,7 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         activityUserMapService.lambdaQuery()
                 .eq(ActivityUserMap::getActivityId, clubQueryUserDto.getActivityId()).page(page);
         List<ActivityUserMap> records = page.getRecords();
-
+        Activity activity = getById(clubQueryUserDto.getActivityId());
         Page<ClubActivityUserVo> result = new Page<>();
         BeanUtils.copyProperties(page, result, "records");
         List<Long> userIds = records.stream().map(ActivityUserMap::getUserId).toList();
@@ -194,6 +194,8 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             ClubActivityUserVo clubActivityUserVo = new ClubActivityUserVo();
             BeanUtils.copyProperties(item, clubActivityUserVo);
             clubActivityUserVo.setUser(collect.get(item.getUserId()));
+            clubActivityUserVo.setBeginTime(activity.getBeginTime());
+            clubActivityUserVo.setEndTime(activity.getEndTime());
             return clubActivityUserVo;
         }).toList();
         return result.setRecords(resultRecords);

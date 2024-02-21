@@ -178,6 +178,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<UserVo> getUserListByIds(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<User> users = this.listByIds(ids);
         if (users.isEmpty()) {
             return new ArrayList<>();
