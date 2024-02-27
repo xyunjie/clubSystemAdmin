@@ -3,6 +3,7 @@ package com.club.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.club.common.result.Result;
 import com.club.entity.dto.ModifyStatusDto;
+import com.club.entity.dto.base.KeyValue;
 import com.club.entity.dto.club.ClubQueryDto;
 import com.club.entity.dto.club.ClubQueryUserDto;
 import com.club.entity.dto.club.ClubSaveOrUpdateDto;
@@ -16,6 +17,8 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @date 2024年02月10日
@@ -32,6 +35,13 @@ public class ClubController extends BaseController {
     @Operation(summary = "获取社团列表")
     public Result<Page<ClubListVo>> list(@RequestBody @Validated ClubQueryDto clubQueryDto) {
         Page<ClubListVo> res = clubService.getClubList(clubQueryDto);
+        return Result.ok(res);
+    }
+
+    @GetMapping("/all")
+    @Operation(summary = "获取全部审核通过社团（k-v）")
+    public Result<List<KeyValue>> getAllClub() {
+        List<KeyValue> res = clubService.getAllClub();
         return Result.ok(res);
     }
 

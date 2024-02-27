@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.club.common.exception.GlobalException;
 import com.club.entity.domain.*;
 import com.club.entity.dto.ModifyStatusDto;
+import com.club.entity.dto.base.KeyValue;
 import com.club.entity.dto.club.*;
 import com.club.entity.enums.ClubStatusEnum;
 import com.club.entity.enums.ClubUserStatusEnum;
@@ -308,6 +309,17 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             // 处理俱乐部余额
             this.updateById(club);
         }
+    }
+
+    @Override
+    public List<KeyValue> getAllClub() {
+        List<Club> list = lambdaQuery().in(Club::getStatus, ClubStatusEnum.UPDATE_INFO.getValue(), ClubStatusEnum.PASS.getValue()).list();
+        return list.stream().map(item -> {
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(item.getName());
+            keyValue.setValue(item.getId());
+            return keyValue;
+        }).toList();
     }
 }
 

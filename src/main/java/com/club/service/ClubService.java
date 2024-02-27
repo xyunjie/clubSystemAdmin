@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.club.entity.domain.Club;
 import com.club.entity.dto.ModifyStatusDto;
+import com.club.entity.dto.base.KeyValue;
 import com.club.entity.dto.club.*;
 import com.club.entity.vo.club.ClubBalanceDetailVo;
 import com.club.entity.vo.club.ClubListVo;
 import com.club.entity.vo.club.ClubUserVo;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.List;
 
 /**
  * @description 针对表【t_club(社团表)】的数据库操作Service
@@ -91,4 +94,9 @@ public interface ClubService extends IService<Club> {
      */
     void handlerClubUser(ClubUserHandlerDto clubUserHandlerDto, Long userId);
 
+    /**
+     *  获取所有社团
+     * @return
+     */
+    List<KeyValue> getAllClub();
 }
