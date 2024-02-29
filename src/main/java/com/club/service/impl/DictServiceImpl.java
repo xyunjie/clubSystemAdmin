@@ -50,7 +50,10 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict>
     @Override
     public List<DictVo> getListByGrade(Long gradeId) {
         // 查询父ID为grade的班级
-        List<Dict> list = lambdaQuery().eq(gradeId != null, Dict::getParentId, gradeId).eq(Dict::getIsGrade, false).list();
+        List<Dict> list = lambdaQuery().eq(Dict::getIsGrade, false).and(item -> {
+            item.eq(gradeId != null, Dict::getGrade, gradeId).or()
+                    .isNull(Dict::getGrade).or().eq(Dict::getGrade, "");
+        }).list();
         // 转为VO
         List<DictVo> dictVos = list.stream().map(item -> {
             DictVo dictVo = new DictVo();

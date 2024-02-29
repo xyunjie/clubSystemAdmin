@@ -82,8 +82,8 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         List<ClubActivityVo> clubActivityVoStream = page.getRecords().stream().map(item -> {
             ClubActivityVo clubActivityVo = new ClubActivityVo();
             BeanUtils.copyProperties(item, clubActivityVo);
-            clubActivityVo.setCreatedUser(userMap.get(item.getCreatedBy()));
-            clubActivityVo.setClubName(clubMap.get(item.getClubId()).getName());
+            clubActivityVo.setCreatedUser(userMap.getOrDefault(item.getCreatedBy(), new User()));
+            clubActivityVo.setClubName(clubMap.getOrDefault(item.getClubId(), new Club()    ).getName());
             return clubActivityVo;
         }).toList();
         return result.setRecords(clubActivityVoStream);
