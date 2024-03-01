@@ -16,7 +16,7 @@ spring:
       max-request-size: 10MB
 
 app:
-  port: 8080
+  port: 8848
 
 qiniu:
   ACCESS_KEY: ZrXQyS_RLjrDkGYk28K4X9xFg4IKzzF922qL3mFF

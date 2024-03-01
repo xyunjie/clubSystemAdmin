@@ -37,12 +37,12 @@ public class System implements Serializable {
     /**
      * 社团模板文件
      */
-    private Long clubTemplate;
+    private String clubTemplate;
 
     /**
      * 更新者
      */
-    private String updatedBy;
+    private Long updatedBy;
 
     /**
      * 创建时间

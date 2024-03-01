@@ -9,7 +9,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @OpenAPIDefinition(servers = { @Server(url = "/", description = "Default Server URL") })
-//@ComponentScan(basePackages = {"com.club.controller"})
 public class ClubSystemAdminApplication {
 
     public static void main(String[] args) throws Exception {
