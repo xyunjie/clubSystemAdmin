@@ -7,7 +7,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/jzx?characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: 123456
+    password: password
     hikari:
       max-lifetime: 180000
   servlet:
@@ -32,6 +32,7 @@ mybatis-plus:
       logic-delete-field: isDeleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+      update-strategy: ignored
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 开启 SQL 执行日志
 

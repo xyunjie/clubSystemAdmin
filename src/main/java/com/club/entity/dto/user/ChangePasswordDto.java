@@ -15,13 +15,13 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ChangePasswordDto {
 
-    @Schema(name = "旧密码")
+    @Schema(description = "旧密码")
     private String oldPassword;
 
-    @Schema(name = "新密码")
+    @Schema(description = "新密码")
     private String newPassword;
 
-    @Schema(name = "重复密码")
+    @Schema(description = "重复密码")
     private String confirmPassword;
 
 }
