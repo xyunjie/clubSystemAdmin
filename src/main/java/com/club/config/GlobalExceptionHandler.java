@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public Result<Object> exceptionHandle(final HttpServletRequest request, Exception e) {
         log.error("捕获异常：", e);
-        return Result.fail("系统异常，请稍后再试！");
+        return Result.fail("服务器繁忙，请稍后再试！");
     }
 
     @ExceptionHandler(GlobalException.class)

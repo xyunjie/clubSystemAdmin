@@ -60,7 +60,12 @@ public class Club implements Serializable {
     private String appendix;
 
     /**
-     * 公告状态
+     * 社团浏览量
+     */
+    private Integer views;
+
+    /**
+     * 社团排序
      */
     private Integer sort;
 

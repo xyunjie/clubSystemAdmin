@@ -34,10 +34,9 @@ public class TokenInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
-        if (!(object instanceof HandlerMethod)) {
+        if (!(object instanceof HandlerMethod handlerMethod)) {
             return true;
         }
-        HandlerMethod handlerMethod = (HandlerMethod) object;
         Method method = handlerMethod.getMethod();
         // 放行注解
         String token = request.getHeader("Token");
@@ -100,7 +99,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         response.setContentType("application/json;charset=UTF-8");
 
         // 创建错误消息对象
-        Result errorMessage = Result.fail("请先登录");
+        Result<String> errorMessage = Result.fail("请先登录");
 
         // 将错误消息对象转换成 JSON 字符串
         ObjectMapper objectMapper = new ObjectMapper();

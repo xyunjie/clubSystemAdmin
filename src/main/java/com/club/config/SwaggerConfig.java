@@ -20,7 +20,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("接口文档")
                         .description("接口文档")
-                        .contact(new Contact().name("Knife4j").email("邮箱").url("公司官网地址"))
+                        .contact(new Contact().name("Knife4j").email("邮箱").url("官网地址"))
                         .version("v1.0"))
                 .addSecurityItem(new SecurityRequirement().addList(headerName))
                 .components(components());

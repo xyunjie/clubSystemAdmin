@@ -1,17 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : localhost
+ Source Server         : docker
  Source Server Type    : MySQL
- Source Server Version : 80031 (8.0.31)
+ Source Server Version : 80033
  Source Host           : localhost:3306
  Source Schema         : jzx
 
  Target Server Type    : MySQL
- Target Server Version : 80031 (8.0.31)
+ Target Server Version : 80033
  File Encoding         : 65001
 
- Date: 18/02/2024 22:20:16
+ Date: 04/03/2024 10:23:24
 */
 
 SET NAMES utf8mb4;
@@ -25,24 +25,27 @@ CREATE TABLE `t_activity`  (
   `id` bigint NOT NULL COMMENT '公告id',
   `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '公告title',
   `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '公告内容',
-  `club_id` bigint NOT NULL COMMENT '公告发布的社团',
-  `kind` enum('notice','activity','warning') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'notice' COMMENT '类型',
+  `club_id` bigint NULL DEFAULT NULL COMMENT '公告发布的社团',
+  `kind` enum('notice','activity','warning','system_notice') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'notice' COMMENT '类型',
   `sort` int NOT NULL DEFAULT 100 COMMENT '排序',
   `top` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否置顶',
   `status` int NOT NULL DEFAULT 0 COMMENT '审核状态',
   `created_by` bigint NOT NULL COMMENT '公告创建者',
+  `views` int NOT NULL DEFAULT 0 COMMENT '点击量',
   `begin_time` datetime NULL DEFAULT NULL COMMENT '开始时间',
   `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社团公告/活动表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社团公告/活动表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_activity
 -- ----------------------------
-INSERT INTO `t_activity` VALUES (1759213901792260097, 'test', 'test', 1756953185202855937, 'notice', 100, b'0', 1, 1755199590053564417, NULL, NULL, '2024-02-18 21:50:53', '2024-02-18 21:52:36', 1);
+INSERT INTO `t_activity` VALUES (1759213901792260097, 'test', 'test', 1756953185202855937, 'notice', 100, b'0', 1, 1755199590053564417, 0, NULL, NULL, '2024-02-18 21:50:53', '2024-02-18 21:52:36', 1);
+INSERT INTO `t_activity` VALUES (1763103817438420993, '测试标题', '测试内容', NULL, 'system_notice', 100, b'0', 0, 1755199590053564417, 0, NULL, NULL, '2024-02-29 15:28:02', '2024-02-29 15:28:02', 0);
+INSERT INTO `t_activity` VALUES (1763104393115029505, '测试标题2', '测试内容2', NULL, 'system_notice', 100, b'0', 0, 1755199590053564417, 0, NULL, NULL, '2024-02-29 15:30:19', '2024-02-29 15:30:19', 0);
 
 -- ----------------------------
 -- Table structure for t_activity_user_map
@@ -57,7 +60,7 @@ CREATE TABLE `t_activity_user_map`  (
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '活动用户映射' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '活动用户映射' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_activity_user_map
@@ -77,6 +80,7 @@ CREATE TABLE `t_club`  (
   `status` int NOT NULL DEFAULT 0 COMMENT '组织审核状态',
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '组织创建时间',
   `kind` enum('union','club') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'club' COMMENT '组织类型',
+  `views` int NOT NULL DEFAULT 0 COMMENT '点击量',
   `appendix` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '附件地址',
   `sort` int NOT NULL DEFAULT 100 COMMENT '排序',
   `top` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否置顶',
@@ -85,13 +89,13 @@ CREATE TABLE `t_club`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `created_by`(`created_by` ASC) USING BTREE,
   CONSTRAINT `t_club_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `t_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社团表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社团表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_club
 -- ----------------------------
-INSERT INTO `t_club` VALUES (1756939006999789569, '测试社团2', '测试社团2', 10.00, 10.00, 1756588473923407874, 1, '2024-02-12 15:11:16', 'club', NULL, 100, b'0', '2024-02-15 15:20:41', 0);
-INSERT INTO `t_club` VALUES (1756953185202855937, '测试社团', '测试社团', 10.00, 0.00, 1755199590053564417, 1, '2024-02-12 16:07:37', 'club', 'https://file.xn--8mrz94a38l8mb00n.top/jzx/20240212/31bf360abfd94d6abe6488f07c2928f6/《响应式Web设计》课程设计-徐云杰.pdf', 100, b'0', '2024-02-12 16:35:13', 0);
+INSERT INTO `t_club` VALUES (1756939006999789569, '测试社团2', '测试社团2', 10.00, 10.00, 1756588473923407874, 1, '2024-02-12 15:11:16', 'club', 0, NULL, 100, b'0', '2024-02-15 15:20:41', 0);
+INSERT INTO `t_club` VALUES (1756953185202855937, '测试社团', '测试社团', 10.00, 0.00, 1755199590053564417, 1, '2024-02-12 16:07:37', 'club', 0, 'https://file.xn--8mrz94a38l8mb00n.top/jzx/20240212/31bf360abfd94d6abe6488f07c2928f6/《响应式Web设计》课程设计-徐云杰.pdf', 100, b'0', '2024-02-12 16:35:13', 0);
 
 -- ----------------------------
 -- Table structure for t_club_user_map
@@ -110,7 +114,7 @@ CREATE TABLE `t_club_user_map`  (
   INDEX `user_id`(`user_id` ASC) USING BTREE,
   CONSTRAINT `t_club_user_map_ibfk_1` FOREIGN KEY (`club_id`) REFERENCES `t_club` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `t_club_user_map_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `t_user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社团/角色映射表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社团/角色映射表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_club_user_map
@@ -136,15 +140,19 @@ CREATE TABLE `t_dict`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `grade`(`grade` ASC) USING BTREE,
   CONSTRAINT `t_dict_ibfk_1` FOREIGN KEY (`grade`) REFERENCES `t_dict` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '字典表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '字典表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_dict
 -- ----------------------------
 INSERT INTO `t_dict` VALUES (1755850881535848450, NULL, '数据智能学院', NULL, b'0', 'XXXXXX', '2024-02-09 15:07:27', '2024-02-11 16:29:54', 0);
-INSERT INTO `t_dict` VALUES (1755851112209985538, 1755850881535848450, '软件工程', NULL, b'0', '舞蹈社', '2024-02-09 15:08:22', '2024-02-11 16:30:06', 0);
-INSERT INTO `t_dict` VALUES (1755872092500279297, NULL, '2020级', NULL, b'1', '2020级', '2024-02-09 16:31:44', '2024-02-11 15:58:04', 0);
+INSERT INTO `t_dict` VALUES (1755851112209985538, 1755850881535848450, '软件工程', NULL, b'0', '软件工程', '2024-02-09 15:08:22', '2024-02-29 07:02:08', 0);
+INSERT INTO `t_dict` VALUES (1755872092500279297, NULL, '2020级', NULL, b'1', '2020级', '2024-02-09 16:31:44', '2024-02-28 14:49:14', 0);
 INSERT INTO `t_dict` VALUES (1756601791987912706, NULL, '海洋工程学院', NULL, b'0', '海洋工程学院', '2024-02-11 16:51:18', '2024-02-11 16:51:18', 0);
+INSERT INTO `t_dict` VALUES (1762762830396555266, 1755851112209985538, '20级软件本3班', 1755872092500279297, b'0', '323232', '2024-02-28 16:53:04', '2024-02-29 14:57:06', 0);
+INSERT INTO `t_dict` VALUES (1762763117802848258, 1755850881535848450, '人工智能', NULL, b'0', '3232', '2024-02-28 16:54:13', '2024-02-29 14:48:11', 0);
+INSERT INTO `t_dict` VALUES (1762763653990088706, 1756601791987912706, '物联网工程', NULL, b'0', 'xxx', '2024-02-28 16:56:20', '2024-02-29 14:47:49', 0);
+INSERT INTO `t_dict` VALUES (1763096430581223426, 1755851112209985538, '20级软件本1班', 1755872092500279297, b'0', '', '2024-02-29 14:58:40', '2024-02-29 14:58:40', 0);
 
 -- ----------------------------
 -- Table structure for t_exciting_moments
@@ -160,7 +168,7 @@ CREATE TABLE `t_exciting_moments`  (
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '活动精彩瞬间' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '活动精彩瞬间' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_exciting_moments
@@ -178,7 +186,7 @@ CREATE TABLE `t_finance`  (
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '财务表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '财务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_finance
@@ -201,7 +209,7 @@ CREATE TABLE `t_finance_detail`  (
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '财务明细' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '财务明细' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_finance_detail
@@ -214,17 +222,20 @@ INSERT INTO `t_finance_detail` VALUES (1758028538541367299, 1756939006999789569,
 DROP TABLE IF EXISTS `t_system`;
 CREATE TABLE `t_system`  (
   `id` bigint NOT NULL COMMENT '系统设置ID',
+  `about` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '关于我们',
+  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '系统简介',
   `club_template` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '新增社团模板文件',
   `updated_by` bigint NOT NULL COMMENT '更新人',
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_system
 -- ----------------------------
+INSERT INTO `t_system` VALUES (1763391654255767554, '关于我们', '系统简介', '', 1755199590053564417, '2024-03-01 10:31:47', '2024-03-01 03:28:31', 0);
 
 -- ----------------------------
 -- Table structure for t_token
@@ -239,13 +250,14 @@ CREATE TABLE `t_token`  (
   `updated_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NOT NULL DEFAULT 0 COMMENT '逻辑删除',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'token表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'token表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_token
 -- ----------------------------
-INSERT INTO `t_token` VALUES (1755203611060633602, 1755199590053564417, 'e3d5d109-9c27-48c5-8de7-c2f676c963cd', '2024-02-25 19:44:37', '2024-02-07 20:15:26', '2024-02-18 19:44:37', 0);
+INSERT INTO `t_token` VALUES (1755203611060633602, 1755199590053564417, '16c69fd3-8a47-4dd7-b3fc-0ba8666437c8', '2024-03-04 10:12:04', '2024-02-07 20:15:26', '2024-03-04 10:12:04', 0);
 INSERT INTO `t_token` VALUES (1756596662358249473, 1756588473923407874, '8bb92342-e483-44da-9e1a-9fee3a725c03', '2024-02-11 16:31:02', '2024-02-11 16:30:55', '2024-02-11 16:31:02', 0);
+INSERT INTO `t_token` VALUES (1764460040045813762, 1763098109519089666, '00a69fbc-048e-46da-9e96-8d7f2a40823b', '2024-03-11 10:12:09', '2024-03-04 09:17:10', '2024-03-04 10:12:09', 0);
 
 -- ----------------------------
 -- Table structure for t_user
@@ -282,12 +294,13 @@ CREATE TABLE `t_user`  (
   CONSTRAINT `t_user_ibfk_2` FOREIGN KEY (`major`) REFERENCES `t_dict` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `t_user_ibfk_3` FOREIGN KEY (`clazz`) REFERENCES `t_dict` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `t_user_ibfk_4` FOREIGN KEY (`grade`) REFERENCES `t_dict` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
 INSERT INTO `t_user` VALUES (1755199590053564417, 'admin', 'admin', '$2a$10$uUGFEk/3Yex3r.dm9st8Ae6WQgqmwnDCogb3gdxP054UfBaX4xbJu', '', NULL, b'1', '超级管理员账号', NULL, NULL, NULL, 1755850881535848450, 1755851112209985538, NULL, NULL, 0, 'admin', '2024-02-07 19:59:27', '2024-02-11 23:34:50', 0);
 INSERT INTO `t_user` VALUES (1756588473923407874, '蒋子璇', '202012000994', '$2a$10$SGOvyIdZNvNE2pBmndDu3OHFKshX3zlTevYf3yPcIP3gnpSDz/7Gq', '', '18006309924', b'1', NULL, '', '', '2292240763@qq.com', 1755850881535848450, 1755851112209985538, NULL, 1755872092500279297, 0, 'user', '2024-02-11 15:58:23', '2024-02-11 20:33:53', 0);
+INSERT INTO `t_user` VALUES (1763098109519089666, '张三', '202012000111', '$2a$10$OIn8Pwm.8/tOhOdP44zWbuKnyWyWJH9LhX8/rc7e7AAmWax49emsO', NULL, '18345678910', b'1', NULL, '123', '123', '123@qq.com', 1763096430581223426, NULL, NULL, 1755872092500279297, 0, 'user', '2024-02-29 15:05:21', '2024-03-04 01:16:57', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;

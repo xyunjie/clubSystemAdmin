@@ -44,7 +44,12 @@ public class Activity implements Serializable {
     private String kind;
 
     /**
-     * 公告状态
+     * 公告浏览量
+     */
+    private Integer views;
+
+    /**
+     * 公告排序
      */
     private Integer sort;
 
@@ -54,7 +59,7 @@ public class Activity implements Serializable {
     private Boolean top;
 
     /**
-     *  公告状态
+     * 公告状态
      */
     private Integer status;
 
