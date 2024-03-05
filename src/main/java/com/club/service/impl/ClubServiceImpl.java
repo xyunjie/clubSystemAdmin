@@ -321,6 +321,68 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             return keyValue;
         }).toList();
     }
+
+    @Override
+    public Page<ClubListVo> getMyClub(ClubQueryDto clubQueryDto, Long userId) {
+        Page<Club> page = new Page<>(clubQueryDto.getPageNumber(), clubQueryDto.getPageSize());
+        LambdaQueryWrapper<Club> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotEmpty(clubQueryDto.getQuery()), Club::getName, clubQueryDto.getQuery());
+        List<ClubUserMap> myJoinClubList = clubUserMapService.lambdaQuery().eq(ClubUserMap::getUserId, userId).list();
+        if (myJoinClubList.isEmpty()) {
+            return new Page<>(page.getCurrent(), page.getSize());
+        }
+        List<Long> myJoinClubIds = myJoinClubList.stream().map(ClubUserMap::getClubId).toList();
+        queryWrapper.in(Club::getId, myJoinClubIds);
+        this.page(page, queryWrapper);
+        if (page.getRecords().isEmpty()) {
+            return new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        }
+        // 封装Vo
+        List<Long> userIds = page.getRecords().stream().map(Club::getCreatedBy).distinct().toList();
+        Map<Long, User> userMap = userService.listByIds(userIds).stream().collect(Collectors.toMap(User::getId, item -> item));
+        Map<Long, ClubUserMap> clubMap = myJoinClubList.stream().collect(Collectors.toMap(ClubUserMap::getClubId, item -> item));
+        List<ClubListVo> result = page.getRecords().stream().map(item -> {
+            ClubListVo clubListVo = new ClubListVo();
+            BeanUtils.copyProperties(item, clubListVo);
+            clubListVo.setCreatedUser(userMap.get(item.getCreatedBy()));
+            clubListVo.setCreatedName(userMap.get(item.getCreatedBy()).getName());
+            clubListVo.setStatusName(ClubStatusEnum.getDesc(item.getStatus()));
+            clubListVo.setJoinStatus(clubMap.get(item.getId()).getStatus());
+            return clubListVo;
+        }).toList();
+        Page<ClubListVo> resultPage = new Page<>();
+        BeanUtils.copyProperties(page, resultPage);
+        resultPage.setRecords(result);
+        return resultPage;
+    }
+
+    @Override
+    public List<ClubListVo> getHot() {
+        List<Club> list = this.lambdaQuery().orderByDesc(Club::getViews).orderByAsc(Club::getCreatedTime).last("limit 10").list();
+        return list.stream().map(item -> {
+            ClubListVo clubListVo = new ClubListVo();
+            BeanUtils.copyProperties(item, clubListVo);
+            return clubListVo;
+        }).toList();
+    }
+
+    @Override
+    public ClubListVo getClubDetail(Long id) {
+        Club club = this.getById(id);
+        if (club == null) {
+            return new ClubListVo();
+        }
+        ClubListVo clubListVo = new ClubListVo();
+        BeanUtils.copyProperties(club, clubListVo);
+        User user = userService.getById(club.getCreatedBy());
+        Long count = clubUserMapService.lambdaQuery().eq(ClubUserMap::getClubId, club.getId())
+                .in(ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue(), ClubUserStatusEnum.CLUB_MEMBER.getValue()).count();
+        clubListVo.setCreatedUser(user);
+        clubListVo.setCreatedName(user.getName());
+        clubListVo.setStatusName(ClubStatusEnum.getDesc(club.getStatus()));
+        clubListVo.setMemberCount(count.intValue());
+        return clubListVo;
+    }
 }
 
 

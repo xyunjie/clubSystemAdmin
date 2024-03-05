@@ -82,21 +82,48 @@ public interface ClubService extends IService<Club> {
     void removeClubUser(ClubUserRemoveOrJoinDto clubUserRemoveDto);
 
     /**
-     *  加入社团
+     * 加入社团
+     *
      * @param clubUserJoinDto
      */
     void joinClub(ClubUserRemoveOrJoinDto clubUserJoinDto);
 
     /**
-     *  处理成员请求
+     * 处理成员请求
+     *
      * @param clubUserHandlerDto
      * @param userId
      */
     void handlerClubUser(ClubUserHandlerDto clubUserHandlerDto, Long userId);
 
     /**
-     *  获取所有社团
+     * 获取所有社团
+     *
      * @return
      */
     List<KeyValue> getAllClub();
+
+    /**
+     * 获取我的社团
+     *
+     * @param clubQueryDto
+     * @param userId
+     * @return
+     */
+    Page<ClubListVo> getMyClub(ClubQueryDto clubQueryDto, Long userId);
+
+    /**
+     * 获取热门社团
+     *
+     * @return
+     */
+    List<ClubListVo> getHot();
+
+    /**
+     * 获取社团详情
+     *
+     * @param id
+     * @return
+     */
+    ClubListVo getClubDetail(Long id);
 }

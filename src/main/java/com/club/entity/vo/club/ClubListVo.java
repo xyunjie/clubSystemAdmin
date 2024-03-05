@@ -69,6 +69,10 @@ public class ClubListVo {
     @ExcelProperty(value = "余额", index = 6)
     private BigDecimal balance;
 
+    @Schema(description = "加入状态")
+    @ExcelIgnore
+    private Integer joinStatus;
+
     @Schema(description = "附件")
     @ExcelIgnore
     private String appendix;

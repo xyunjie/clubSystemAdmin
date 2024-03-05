@@ -38,6 +38,27 @@ public class ClubController extends BaseController {
         return Result.ok(res);
     }
 
+    @PostMapping("myClub")
+    @Operation(summary = "获取我加入的社团列表")
+    public Result<Page<ClubListVo>> myClub(@RequestBody @Validated ClubQueryDto clubQueryDto) {
+        Page<ClubListVo> res = clubService.getMyClub(clubQueryDto, getUserId());
+        return Result.ok(res);
+    }
+
+    @GetMapping("detail")
+    @Operation(summary = "获取社团详情")
+    public Result<ClubListVo> detail(@RequestParam Long id) {
+        ClubListVo res = clubService.getClubDetail(id);
+        return Result.ok(res);
+    }
+
+    @GetMapping("hot")
+    @Operation(summary = "获取热门社团")
+    public Result<List<ClubListVo>> hot() {
+        List<ClubListVo> res = clubService.getHot();
+        return Result.ok(res);
+    }
+
     @GetMapping("/all")
     @Operation(summary = "获取全部审核通过社团（k-v）")
     public Result<List<KeyValue>> getAllClub() {
