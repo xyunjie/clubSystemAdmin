@@ -200,6 +200,30 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         }).toList();
         return result.setRecords(resultRecords);
     }
+
+    @Override
+    public List<ClubActivityVo> getHotActivityList() {
+        LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Activity::getStatus, ActivityStatusEnum.AUDIT_PASS.getValue());
+        queryWrapper.orderByDesc(Activity::getViews);
+        queryWrapper.orderByDesc(Activity::getCreatedTime);
+        queryWrapper.last("limit 10");
+        List<Activity> list = this.list(queryWrapper);
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Long> clubIds = list.stream().map(Activity::getClubId).distinct().toList();
+        List<Long> userIds = list.stream().map(Activity::getCreatedBy).distinct().toList();
+        Map<Long, Club> clubMap = clubMapper.selectBatchIds(clubIds).stream().collect(Collectors.toMap(Club::getId, item -> item));
+        Map<Long, User> userMap = userService.listByIds(userIds).stream().collect(Collectors.toMap(User::getId, item -> item));
+        return list.stream().map(item -> {
+            ClubActivityVo clubActivityVo = new ClubActivityVo();
+            BeanUtils.copyProperties(item, clubActivityVo);
+            clubActivityVo.setCreatedUser(userMap.getOrDefault(item.getCreatedBy(), new User()));
+            clubActivityVo.setClubName(clubMap.getOrDefault(item.getClubId(), new Club()).getName());
+            return clubActivityVo;
+        }).toList();
+    }
 }
 
 

@@ -12,7 +12,9 @@ public enum ActivityKindEnum {
 
     NOTICE("notice", "通知"),
     ACTIVITY("activity", "活动"),
-    WARINING("warning", "预警");
+    WARNING("warning", "预警"),
+    SYSTEM_NOTICE("system_notice", "系统公告"),
+    ;
 
     private String value;
     private String text;

@@ -15,6 +15,8 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @date 2024年02月18日
  */
@@ -37,6 +39,13 @@ public class ClubActivityController extends BaseController {
     @Operation(summary = "获取公告/活动列表")
     public Result<Page<ClubActivityVo>> list(@RequestBody @Validated ClubActivityQueryDto clubActivityQueryDto) {
         Page<ClubActivityVo> res = activityService.getClubNoticeList(clubActivityQueryDto);
+        return Result.ok(res);
+    }
+
+    @GetMapping("/hot")
+    @Operation(summary = "获取热门公告/活动列表")
+    public Result<List<ClubActivityVo>> getHotActivityList() {
+        List<ClubActivityVo> res = activityService.getHotActivityList();
         return Result.ok(res);
     }
 

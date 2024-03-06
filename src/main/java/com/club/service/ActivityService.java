@@ -10,6 +10,8 @@ import com.club.entity.dto.club.ClubQueryUserDto;
 import com.club.entity.vo.club.ClubActivityUserVo;
 import com.club.entity.vo.club.ClubActivityVo;
 
+import java.util.List;
+
 /**
  * @description 针对表【t_activity(社团公告/活动表)】的数据库操作Service
  * @createDate 2024-02-07 18:31:00
@@ -74,4 +76,10 @@ public interface ActivityService extends IService<Activity> {
      * @return
      */
     Page<ClubActivityUserVo> getActivityUserList(ClubQueryUserDto clubQueryUserDto);
+
+    /**
+     * 获取热门公告/活动列表
+     * @return
+     */
+    List<ClubActivityVo> getHotActivityList();
 }

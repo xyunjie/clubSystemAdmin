@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
+ * 活动状态枚举
  * @date 2024年02月18日
  */
 @Getter
