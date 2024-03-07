@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : docker
+ Source Server         : localhost
  Source Server Type    : MySQL
  Source Server Version : 80033
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80033
  File Encoding         : 65001
 
- Date: 04/03/2024 10:23:24
+ Date: 07/03/2024 16:52:19
 */
 
 SET NAMES utf8mb4;
@@ -255,7 +255,7 @@ CREATE TABLE `t_token`  (
 -- ----------------------------
 -- Records of t_token
 -- ----------------------------
-INSERT INTO `t_token` VALUES (1755203611060633602, 1755199590053564417, '16c69fd3-8a47-4dd7-b3fc-0ba8666437c8', '2024-03-04 10:12:04', '2024-02-07 20:15:26', '2024-03-04 10:12:04', 0);
+INSERT INTO `t_token` VALUES (1755203611060633602, 1755199590053564417, 'c169b19c-14fb-4f29-9f66-ec14f14def92', '2024-03-13 13:53:15', '2024-02-07 20:15:26', '2024-03-06 13:53:15', 0);
 INSERT INTO `t_token` VALUES (1756596662358249473, 1756588473923407874, '8bb92342-e483-44da-9e1a-9fee3a725c03', '2024-02-11 16:31:02', '2024-02-11 16:30:55', '2024-02-11 16:31:02', 0);
 INSERT INTO `t_token` VALUES (1764460040045813762, 1763098109519089666, '00a69fbc-048e-46da-9e96-8d7f2a40823b', '2024-03-11 10:12:09', '2024-03-04 09:17:10', '2024-03-04 10:12:09', 0);
 
