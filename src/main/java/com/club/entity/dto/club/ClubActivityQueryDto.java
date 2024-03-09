@@ -25,4 +25,10 @@ public class ClubActivityQueryDto extends PageQuery {
     @Schema(description = "类型")
     private String kind;
 
+    @Schema(description = "是否为管理员")
+    private Boolean isAdmin;
+
+    @Schema(description = "用户id", hidden = true)
+    private Long userId;
+
 }

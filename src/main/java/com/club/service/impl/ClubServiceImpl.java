@@ -164,6 +164,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             UserVo userVo = userService.parseUserToUserVo(userInfo, dicts);
             ClubUserVo clubUserVo = new ClubUserVo();
             BeanUtils.copyProperties(userVo, clubUserVo);
+            clubUserVo.setId(item.getId());
             clubUserVo.setClubStatus(item.getStatus());
             return clubUserVo;
         }).toList();
@@ -327,7 +328,10 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         Page<Club> page = new Page<>(clubQueryDto.getPageNumber(), clubQueryDto.getPageSize());
         LambdaQueryWrapper<Club> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(StringUtils.isNotEmpty(clubQueryDto.getQuery()), Club::getName, clubQueryDto.getQuery());
-        List<ClubUserMap> myJoinClubList = clubUserMapService.lambdaQuery().eq(ClubUserMap::getUserId, userId).list();
+        List<ClubUserMap> myJoinClubList = clubUserMapService.lambdaQuery()
+                .eq(ClubUserMap::getUserId, userId)
+                .in(!clubQueryDto.getIsAdmin(), ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue(), ClubUserStatusEnum.CLUB_MEMBER.getValue())
+                .list();
         if (myJoinClubList.isEmpty()) {
             return new Page<>(page.getCurrent(), page.getSize());
         }

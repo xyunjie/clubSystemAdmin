@@ -38,6 +38,7 @@ public class ClubActivityController extends BaseController {
     @PostMapping("/list")
     @Operation(summary = "获取公告/活动列表")
     public Result<Page<ClubActivityVo>> list(@RequestBody @Validated ClubActivityQueryDto clubActivityQueryDto) {
+        clubActivityQueryDto.setUserId(getUserId());
         Page<ClubActivityVo> res = activityService.getClubNoticeList(clubActivityQueryDto);
         return Result.ok(res);
     }

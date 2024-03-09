@@ -19,4 +19,7 @@ public class ClubQueryDto extends PageQuery {
     @Schema(description = "社团名称")
     private String name;
 
+    @Schema(description = "是否是社团管理员")
+    private Boolean isAdmin;
+
 }

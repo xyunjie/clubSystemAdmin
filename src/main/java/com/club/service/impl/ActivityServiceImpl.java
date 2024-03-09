@@ -58,6 +58,11 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         queryWrapper.eq(clubActivityQueryDto.getStatus() != null, Activity::getStatus, clubActivityQueryDto.getStatus());
         queryWrapper.like(StringUtils.isNotEmpty(clubActivityQueryDto.getQuery()), Activity::getTitle, clubActivityQueryDto.getQuery());
         queryWrapper.like(StringUtils.isNotEmpty(clubActivityQueryDto.getQuery()), Activity::getContent, clubActivityQueryDto.getQuery());
+        queryWrapper.eq(!clubActivityQueryDto.getIsAdmin(), Activity::getStatus, ActivityStatusEnum.AUDIT_PASS.getValue());
+        queryWrapper.or(item -> {
+            item.eq(Activity::getCreatedBy, clubActivityQueryDto.getUserId());
+            item.eq(StringUtils.isNotEmpty(clubActivityQueryDto.getKind()), Activity::getKind, clubActivityQueryDto.getKind());
+        });
         if (StringUtils.isNotEmpty(clubActivityQueryDto.getQuery())) {
             LambdaQueryWrapper<Club> clubLambdaQueryWrapper = new LambdaQueryWrapper<>();
             clubLambdaQueryWrapper.like(Club::getName, clubActivityQueryDto.getQuery());
