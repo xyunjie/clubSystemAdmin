@@ -58,13 +58,15 @@ public interface ActivityService extends IService<Activity> {
     void entryActivity(Long id, Long userId);
 
     /**
-     *  修改通知/活动进入状态
+     * 修改通知/活动进入状态
+     *
      * @param modifyStatusDto
      */
     void modifyActivityEntryStatus(ModifyStatusDto modifyStatusDto);
 
     /**
-     *  删除通知/活动进入状态
+     * 删除通知/活动进入状态
+     *
      * @param id
      * @param userId
      */
@@ -72,6 +74,7 @@ public interface ActivityService extends IService<Activity> {
 
     /**
      * 获取活动报名成员
+     *
      * @param clubQueryUserDto
      * @return
      */
@@ -79,14 +82,24 @@ public interface ActivityService extends IService<Activity> {
 
     /**
      * 获取热门公告/活动列表
+     *
      * @return
      */
     List<ClubActivityVo> getHotActivityList();
 
     /**
-     *  获取我的通知/活动列表
+     * 获取我的通知/活动列表
+     *
      * @param userId
      * @return
      */
     List<ClubActivityVo> getClubWarning(Long userId);
+
+    /**
+     * 获取我的活动参加的人员
+     *
+     * @param clubActivityQueryDto
+     * @return
+     */
+    Page<ClubActivityUserVo> getMyActivity(ClubActivityQueryDto clubActivityQueryDto);
 }

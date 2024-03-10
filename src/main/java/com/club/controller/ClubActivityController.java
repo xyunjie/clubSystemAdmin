@@ -43,6 +43,14 @@ public class ClubActivityController extends BaseController {
         return Result.ok(res);
     }
 
+    @PostMapping("/getMyActivity")
+    @Operation(summary = "获取我的活动报名人员")
+    public Result<Page<ClubActivityUserVo>> getMyActivity(@RequestBody @Validated ClubActivityQueryDto clubActivityQueryDto) {
+        clubActivityQueryDto.setUserId(getUserId());
+        Page<ClubActivityUserVo> res = activityService.getMyActivity(clubActivityQueryDto);
+        return Result.ok(res);
+    }
+
     @GetMapping("getClubWarning")
     @Operation(summary = "获取社团预警")
     public Result<List<ClubActivityVo>> getClubWarning() {
@@ -51,7 +59,7 @@ public class ClubActivityController extends BaseController {
     }
 
     @GetMapping("/hot")
-    @Operation(summary = "获取热门公告/活动列表")
+    @Operation(summary = "获取热门活动列表")
     public Result<List<ClubActivityVo>> getHotActivityList() {
         List<ClubActivityVo> res = activityService.getHotActivityList();
         return Result.ok(res);

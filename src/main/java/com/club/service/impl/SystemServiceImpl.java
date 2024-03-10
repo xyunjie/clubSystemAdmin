@@ -8,7 +8,6 @@ import com.club.entity.domain.Activity;
 import com.club.entity.domain.System;
 import com.club.entity.dto.base.PageQuery;
 import com.club.entity.enums.ActivityKindEnum;
-import com.club.entity.enums.ActivityStatusEnum;
 import com.club.entity.vo.club.ClubActivityVo;
 import com.club.mapper.ActivityMapper;
 import com.club.mapper.SystemMapper;
@@ -57,7 +56,6 @@ public class SystemServiceImpl extends ServiceImpl<SystemMapper, System>
         Page<Activity> page = new Page<>(pageQuery.getPageNumber(), pageQuery.getPageSize());
         LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Activity::getKind, ActivityKindEnum.SYSTEM_NOTICE.getValue());
-        queryWrapper.eq(Activity::getStatus, ActivityStatusEnum.AUDIT_PASS.getValue());
         queryWrapper.orderByAsc(Activity::getCreatedTime);
         Page<Activity> activityPage = activityMapper.selectPage(page, queryWrapper);
         List<Activity> records = activityPage.getRecords();

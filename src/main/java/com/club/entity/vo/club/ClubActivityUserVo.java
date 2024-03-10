@@ -22,6 +22,8 @@ public class ClubActivityUserVo {
     private Long id;
     @Schema(description = "活动ID")
     private Long activityId;
+    @Schema(description = "活动名称")
+    private String activityName;
     @Schema(description = "用户ID")
     private Long userId;
     @Schema(description = "用户信息")

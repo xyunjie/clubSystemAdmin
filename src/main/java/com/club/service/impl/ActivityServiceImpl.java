@@ -90,7 +90,7 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             ClubActivityVo clubActivityVo = new ClubActivityVo();
             BeanUtils.copyProperties(item, clubActivityVo);
             clubActivityVo.setCreatedUser(userMap.getOrDefault(item.getCreatedBy(), new User()));
-            clubActivityVo.setClubName(clubMap.getOrDefault(item.getClubId(), new Club()    ).getName());
+            clubActivityVo.setClubName(clubMap.getOrDefault(item.getClubId(), new Club()).getName());
             return clubActivityVo;
         }).toList();
         return result.setRecords(clubActivityVoStream);
@@ -212,6 +212,7 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
     public List<ClubActivityVo> getHotActivityList() {
         LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Activity::getStatus, ActivityStatusEnum.AUDIT_PASS.getValue());
+        queryWrapper.eq(Activity::getKind, ActivityKindEnum.ACTIVITY.getValue());
         queryWrapper.orderByDesc(Activity::getViews);
         queryWrapper.orderByDesc(Activity::getCreatedTime);
         queryWrapper.last("limit 10");
@@ -256,6 +257,37 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             clubActivityVo.setClubName(clubs.stream().filter(club -> club.getId().equals(item.getClubId())).findFirst().orElse(new Club()).getName());
             return clubActivityVo;
         }).toList();
+    }
+
+    @Override
+    public Page<ClubActivityUserVo> getMyActivity(ClubActivityQueryDto clubActivityQueryDto) {
+        List<Activity> list = this.lambdaQuery()
+                .eq(Activity::getCreatedBy, clubActivityQueryDto.getUserId())
+                .eq(Activity::getKind, ActivityKindEnum.ACTIVITY.getValue()).list();
+        if (list.isEmpty()) {
+            return new Page<>();
+        }
+        List<Long> activityIds = list.stream().map(Activity::getId).toList();
+        Page<ActivityUserMap> page = new Page<>(clubActivityQueryDto.getPageNumber(), clubActivityQueryDto.getPageSize());
+        activityUserMapService.lambdaQuery().in(ActivityUserMap::getActivityId, activityIds).orderByDesc(ActivityUserMap::getActivityId).page(page);
+        List<ActivityUserMap> activityUserMapList = page.getRecords();
+        List<Long> userIds = activityUserMapList.stream().map(ActivityUserMap::getUserId).distinct().toList();
+        Map<Long, UserVo> collect = userService.getUserListByIds(userIds).stream().collect(Collectors.toMap(UserVo::getId, item -> item));
+        List<ClubActivityUserVo> clubActivityUserVoList = activityUserMapList.stream().map(item -> {
+            ClubActivityUserVo clubActivityUserVo = new ClubActivityUserVo();
+            BeanUtils.copyProperties(item, clubActivityUserVo);
+            Activity activity = list.stream()
+                    .filter(a -> a.getId().equals(item.getActivityId())).findFirst().orElse(new Activity());
+            clubActivityUserVo.setUser(collect.get(item.getUserId()));
+            clubActivityUserVo.setActivityName(activity.getTitle());
+            clubActivityUserVo.setBeginTime(activity.getBeginTime());
+            clubActivityUserVo.setEndTime(activity.getEndTime());
+            return clubActivityUserVo;
+        }).toList();
+        Page<ClubActivityUserVo> resPage = new Page<>();
+        BeanUtils.copyProperties(page, resPage, "records");
+        resPage.setRecords(clubActivityUserVoList);
+        return resPage;
     }
 }
 
