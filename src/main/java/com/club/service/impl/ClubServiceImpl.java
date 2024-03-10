@@ -178,9 +178,13 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         // 获取社团成员列表
         List<Club> myClubList = this.lambdaQuery().eq(Club::getCreatedBy, userId).list();
         List<Dict> dicts = dictService.list();
+        List<Long> clubIds = myClubList.stream().map(Club::getId).toList();
+        if (clubIds.isEmpty()) {
+            return new Page<>();
+        }
         Page<ClubUserMap> page = new Page<>(clubQueryUserDto.getPageNumber(), clubQueryUserDto.getPageSize());
         LambdaQueryWrapper<ClubUserMap> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(ClubUserMap::getClubId, myClubList.stream().map(Club::getId).toList());
+        queryWrapper.in(ClubUserMap::getClubId, clubIds);
         queryWrapper.last("order by status <> -1, status <> 1, status <> 0, club_id desc, status desc");
         clubUserMapService.page(page, queryWrapper);
         List<Long> list = page.getRecords().stream().map(ClubUserMap::getUserId).toList();

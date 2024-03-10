@@ -46,6 +46,9 @@ public class FinanceDetailServiceImpl extends ServiceImpl<FinanceDetailMapper, F
     public Page<ClubBalanceDetailVo> getClubFinanceDetailList(PageQuery pageQuery, Long userId) {
         List<ClubUserMap> list = clubUserMapService.lambdaQuery().eq(ClubUserMap::getUserId, userId).eq(ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue()).list();
         List<Long> clubIds = list.stream().map(ClubUserMap::getClubId).toList();
+        if (clubIds.isEmpty()) {
+            return new Page<>();
+        }
         LambdaQueryWrapper<Club> clubLambdaQueryWrapper = new LambdaQueryWrapper<>();
         clubLambdaQueryWrapper.in(Club::getId, clubIds);
         List<Club> clubs = clubMapper.selectList(clubLambdaQueryWrapper);
@@ -84,6 +87,7 @@ public class FinanceDetailServiceImpl extends ServiceImpl<FinanceDetailMapper, F
                 .last("limit 1").one();
         if (one == null) {
             one = new FinanceDetail();
+            one.setBalance(BigDecimal.ZERO);
         }
         if (clubBalanceSaveDto.getAmount().add(one.getBalance()).compareTo(BigDecimal.ZERO) < 0) {
             throw new GlobalException("余额不足");
