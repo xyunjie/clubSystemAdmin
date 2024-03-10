@@ -174,6 +174,40 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
     }
 
     @Override
+    public Page<ClubUserVo> getMyClubUser(ClubQueryUserDto clubQueryUserDto, Long userId) {
+        // 获取社团成员列表
+        List<Club> myClubList = this.lambdaQuery().eq(Club::getCreatedBy, userId).list();
+        List<Dict> dicts = dictService.list();
+        Page<ClubUserMap> page = new Page<>(clubQueryUserDto.getPageNumber(), clubQueryUserDto.getPageSize());
+        LambdaQueryWrapper<ClubUserMap> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(ClubUserMap::getClubId, myClubList.stream().map(Club::getId).toList());
+        queryWrapper.last("order by status <> -1, status <> 1, status <> 0, club_id desc, status desc");
+        clubUserMapService.page(page, queryWrapper);
+        List<Long> list = page.getRecords().stream().map(ClubUserMap::getUserId).toList();
+        if (list.isEmpty()) {
+            return new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        }
+        List<User> userList = userService.listByIds(list);
+        List<ClubUserVo> result = page.getRecords().stream().map(item -> {
+            User userInfo = userList.stream().filter(user -> user.getId().equals(item.getUserId())).findFirst().orElse(null);
+            if (userInfo == null) {
+                throw new GlobalException("用户不存在");
+            }
+            UserVo userVo = userService.parseUserToUserVo(userInfo, dicts);
+            ClubUserVo clubUserVo = new ClubUserVo();
+            BeanUtils.copyProperties(userVo, clubUserVo);
+            clubUserVo.setCreatedTime(item.getCreatedTime());
+            clubUserVo.setId(item.getId());
+            clubUserVo.setClubStatus(item.getStatus());
+            clubUserVo.setClubName(myClubList.stream().filter(club -> club.getId().equals(item.getClubId())).findFirst().orElse(new Club()).getName());
+            return clubUserVo;
+        }).toList();
+        Page<ClubUserVo> resultPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        resultPage.setRecords(result);
+        return resultPage;
+    }
+
+    @Override
     public void removeClub(Long id, Long userId) {
         // 删除
         boolean b = this.removeById(id);
@@ -330,7 +364,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         queryWrapper.like(StringUtils.isNotEmpty(clubQueryDto.getQuery()), Club::getName, clubQueryDto.getQuery());
         List<ClubUserMap> myJoinClubList = clubUserMapService.lambdaQuery()
                 .eq(ClubUserMap::getUserId, userId)
-                .in(!clubQueryDto.getIsAdmin(), ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue(), ClubUserStatusEnum.CLUB_MEMBER.getValue())
+                .in(!clubQueryDto.getIsAdmin(), ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue())
                 .list();
         if (myJoinClubList.isEmpty()) {
             return new Page<>(page.getCurrent(), page.getSize());
@@ -362,7 +396,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
 
     @Override
     public List<ClubListVo> getHot() {
-        List<Club> list = this.lambdaQuery().orderByDesc(Club::getViews).orderByAsc(Club::getCreatedTime).last("limit 10").list();
+        List<Club> list = this.lambdaQuery().eq(Club::getStatus, ClubStatusEnum.PASS.getValue()).orderByDesc(Club::getViews).orderByAsc(Club::getCreatedTime).last("limit 10").list();
         return list.stream().map(item -> {
             ClubListVo clubListVo = new ClubListVo();
             BeanUtils.copyProperties(item, clubListVo);

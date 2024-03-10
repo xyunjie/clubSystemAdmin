@@ -82,4 +82,11 @@ public interface ActivityService extends IService<Activity> {
      * @return
      */
     List<ClubActivityVo> getHotActivityList();
+
+    /**
+     *  获取我的通知/活动列表
+     * @param userId
+     * @return
+     */
+    List<ClubActivityVo> getClubWarning(Long userId);
 }

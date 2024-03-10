@@ -21,6 +21,12 @@ public class ClubBalanceDetailVo {
     @Schema(description = "ID")
     private Long id;
 
+    @Schema(description = "社团ID")
+    private Long clubId;
+
+    @Schema(description = "社团名称")
+    private String clubName;
+
     @Schema(description = "用户名称")
     private String userName;
 

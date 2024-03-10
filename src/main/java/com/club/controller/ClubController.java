@@ -87,6 +87,13 @@ public class ClubController extends BaseController {
         return Result.ok(list);
     }
 
+    @PostMapping("getMyClubUser")
+    @Operation(summary = "获取我的社团成员信息")
+    public Result<Page<ClubUserVo>> getMyClubUser(@RequestBody @Validated ClubQueryUserDto clubQueryUserDto) {
+        Page<ClubUserVo> list = clubService.getMyClubUser(clubQueryUserDto, getUserId());
+        return Result.ok(list);
+    }
+
     @DeleteMapping("/remove")
     @Operation(summary = "删除社团")
     public Result<String> remove(@RequestParam Long id) {

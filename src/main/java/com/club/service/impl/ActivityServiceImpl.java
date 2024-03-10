@@ -10,7 +10,9 @@ import com.club.entity.dto.ModifyStatusDto;
 import com.club.entity.dto.club.ClubActivityQueryDto;
 import com.club.entity.dto.club.ClubActivitySaveDto;
 import com.club.entity.dto.club.ClubQueryUserDto;
+import com.club.entity.enums.ActivityKindEnum;
 import com.club.entity.enums.ActivityStatusEnum;
+import com.club.entity.enums.ClubUserStatusEnum;
 import com.club.entity.vo.UserVo;
 import com.club.entity.vo.club.ClubActivityUserVo;
 import com.club.entity.vo.club.ClubActivityVo;
@@ -226,6 +228,32 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
             BeanUtils.copyProperties(item, clubActivityVo);
             clubActivityVo.setCreatedUser(userMap.getOrDefault(item.getCreatedBy(), new User()));
             clubActivityVo.setClubName(clubMap.getOrDefault(item.getClubId(), new Club()).getName());
+            return clubActivityVo;
+        }).toList();
+    }
+
+    @Override
+    public List<ClubActivityVo> getClubWarning(Long userId) {
+        LambdaQueryWrapper<ClubUserMap> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClubUserMap::getUserId, userId);
+        queryWrapper.eq(ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue());
+        queryWrapper.select(ClubUserMap::getClubId);
+        List<Long> list = clubUserMapMapper.selectList(queryWrapper).stream().map(ClubUserMap::getClubId).toList();
+        LambdaQueryWrapper<Activity> activityLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        activityLambdaQueryWrapper
+                .in(Activity::getClubId, list)
+                .eq(Activity::getKind, ActivityKindEnum.WARNING.getValue());
+        List<Activity> activities = this.list(activityLambdaQueryWrapper);
+        if (activities.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<User> users = userService.listByIds(activities.stream().map(Activity::getCreatedBy).toList());
+        List<Club> clubs = clubMapper.selectBatchIds(list);
+        return activities.stream().map(item -> {
+            ClubActivityVo clubActivityVo = new ClubActivityVo();
+            BeanUtils.copyProperties(item, clubActivityVo);
+            clubActivityVo.setCreatedUser(users.stream().filter(user -> user.getId().equals(item.getCreatedBy())).findFirst().orElse(new User()));
+            clubActivityVo.setClubName(clubs.stream().filter(club -> club.getId().equals(item.getClubId())).findFirst().orElse(new Club()).getName());
             return clubActivityVo;
         }).toList();
     }

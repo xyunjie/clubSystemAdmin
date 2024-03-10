@@ -43,6 +43,13 @@ public class ClubActivityController extends BaseController {
         return Result.ok(res);
     }
 
+    @GetMapping("getClubWarning")
+    @Operation(summary = "获取社团预警")
+    public Result<List<ClubActivityVo>> getClubWarning() {
+        List<ClubActivityVo> res = activityService.getClubWarning(getUserId());
+        return Result.ok(res);
+    }
+
     @GetMapping("/hot")
     @Operation(summary = "获取热门公告/活动列表")
     public Result<List<ClubActivityVo>> getHotActivityList() {

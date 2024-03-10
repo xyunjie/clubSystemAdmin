@@ -8,6 +8,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDateTime;
+
 /**
  * @date 2024年02月11日
  */
@@ -20,5 +22,11 @@ public class ClubUserVo extends UserVo {
 
     @Schema(description = "加入社团的状态,-1-社团创建者, 0-已申请, 1-已加入")
     private Integer clubStatus;
+
+    @Schema(description = "社团名称")
+    private String clubName;
+
+    @Schema(description = "申请加入时间")
+    private LocalDateTime createdTime;
 
 }

@@ -126,4 +126,13 @@ public interface ClubService extends IService<Club> {
      * @return
      */
     ClubListVo getClubDetail(Long id);
+
+    /**
+     * 获取社团成员
+     *
+     * @param clubQueryUserDto
+     * @param userId
+     * @return
+     */
+    Page<ClubUserVo> getMyClubUser(ClubQueryUserDto clubQueryUserDto, Long userId);
 }
