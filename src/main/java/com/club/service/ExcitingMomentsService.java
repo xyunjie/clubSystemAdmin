@@ -17,4 +17,6 @@ public interface ExcitingMomentsService extends IService<ExcitingMoments> {
     List<ExcitingMomentsDto> getExcitingMomentsList(Long clubId);
 
     void removeExcitingMoments(Long id, Long userId);
+
+    List<ExcitingMomentsDto> getByClubIdExcitingMomentsList(Long id);
 }

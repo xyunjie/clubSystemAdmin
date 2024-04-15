@@ -35,6 +35,13 @@ public class ExcitingMomentsController extends BaseController {
         return Result.ok(res);
     }
 
+    @GetMapping("listByClubId")
+    @Operation(summary = "获取精彩瞬间列表")
+    public Result<List<ExcitingMomentsDto>> getByClubIdExcitingMomentsList(@RequestParam Long id) {
+        List<ExcitingMomentsDto> res = excitingMomentsService.getByClubIdExcitingMomentsList(id);
+        return Result.ok(res);
+    }
+
     @DeleteMapping("remove")
     @Operation(summary = "删除精彩瞬间")
     public Result<String> removeExcitingMoments(@RequestParam Long id) {

@@ -57,6 +57,17 @@ public class ExcitingMomentsServiceImpl extends ServiceImpl<ExcitingMomentsMappe
     public void removeExcitingMoments(Long id, Long userId) {
         this.removeById(id);
     }
+
+    @Override
+    public List<ExcitingMomentsDto> getByClubIdExcitingMomentsList(Long id) {
+        return this.lambdaQuery().eq(ExcitingMoments::getClubId, id).list().stream().map(item -> {
+            ExcitingMomentsDto excitingMomentsDto = new ExcitingMomentsDto();
+            excitingMomentsDto.setClubId(item.getClubId());
+            excitingMomentsDto.setUrl(item.getUrl());
+            excitingMomentsDto.setId(item.getId());
+            return excitingMomentsDto;
+        }).toList();
+    }
 }
 
 
