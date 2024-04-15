@@ -1,5 +1,6 @@
 package com.club.service.impl;
 
+import cn.hutool.db.PageResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -240,6 +241,9 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         queryWrapper.eq(ClubUserMap::getStatus, ClubUserStatusEnum.CLUB_CREATOR.getValue());
         queryWrapper.select(ClubUserMap::getClubId);
         List<Long> list = clubUserMapMapper.selectList(queryWrapper).stream().map(ClubUserMap::getClubId).toList();
+        if (list.isEmpty()) {
+            return new ArrayList<>();
+        }
         LambdaQueryWrapper<Activity> activityLambdaQueryWrapper = new LambdaQueryWrapper<>();
         activityLambdaQueryWrapper
                 .in(Activity::getClubId, list)
