@@ -1,10 +1,13 @@
 package com.club.entity.domain;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import lombok.Data;
 
 /**
  * 活动精彩瞬间
@@ -24,20 +27,11 @@ public class ExcitingMoments implements Serializable {
      */
     private Long clubId;
 
-    /**
-     * 活动ID
-     */
-    private Long activityId;
 
     /**
      * 图片链接
      */
     private String url;
-
-    /**
-     * 创建者
-     */
-    private Long createdBy;
 
     /**
      * 创建时间
