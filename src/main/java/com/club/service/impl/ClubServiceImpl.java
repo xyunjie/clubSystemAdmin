@@ -32,6 +32,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -209,6 +210,37 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         Page<ClubUserVo> resultPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
         resultPage.setRecords(result);
         return resultPage;
+    }
+
+    @Override
+    public void exportMyClubUser(Long userId, HttpServletResponse response) {
+        List<Club> list = this.lambdaQuery().eq(Club::getCreatedBy, userId).list();
+        if (list.isEmpty()) {
+            throw new GlobalException("没有社团");
+        }
+        List<Long> clubIds = list.stream().map(Club::getId).toList();
+        List<ClubUserMap> clubUserMaps = clubUserMapService.lambdaQuery().in(ClubUserMap::getUserId, clubIds).list();
+        List<Long> userIds = new ArrayList<>(clubUserMaps.stream().map(ClubUserMap::getUserId).toList());
+        userIds.add(userId);
+        List<User> users = userService.listByIds(userIds);
+        List<Dict> dicts = dictService.list();
+        List<UserVo> userVos = users.stream().map(item -> userService.parseUserToUserVo(item, dicts)).toList();
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode(LocalDateTime.now() + "导出成员列表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=" + fileName + ".xlsx");
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            EasyExcel.write(outputStream, UserVo.class).sheet("user").doWrite(userVos);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new GlobalException(e.getMessage(), 400);
+        }
+    }
+
+    @Override
+    public Club getMyCreateClub(Long userId) {
+        return this.lambdaQuery().eq(Club::getCreatedBy, userId).eq(Club::getStatus, ClubStatusEnum.PASS.getValue()).one();
     }
 
     @Override

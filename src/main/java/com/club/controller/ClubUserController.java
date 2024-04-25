@@ -7,6 +7,7 @@ import com.club.service.ClubService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,5 +46,12 @@ public class ClubUserController extends BaseController {
         clubService.handlerClubUser(clubUserHandlerDto, getUserId());
 
         return Result.ok();
+    }
+
+    @PostMapping("export")
+    @Operation(summary = "导出社团用户信息")
+    public void export(HttpServletResponse response) {
+        Long userId = getUserId();
+        clubService.exportMyClubUser(userId, response);
     }
 }

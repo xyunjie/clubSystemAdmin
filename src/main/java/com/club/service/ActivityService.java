@@ -9,6 +9,7 @@ import com.club.entity.dto.club.ClubActivitySaveDto;
 import com.club.entity.dto.club.ClubQueryUserDto;
 import com.club.entity.vo.club.ClubActivityUserVo;
 import com.club.entity.vo.club.ClubActivityVo;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.List;
 
@@ -102,4 +103,6 @@ public interface ActivityService extends IService<Activity> {
      * @return
      */
     Page<ClubActivityUserVo> getMyActivity(ClubActivityQueryDto clubActivityQueryDto);
+
+    void exportActivityUserList(ClubQueryUserDto clubQueryUserDto, Long userId, HttpServletResponse response);
 }

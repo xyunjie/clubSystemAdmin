@@ -8,10 +8,12 @@ import com.club.entity.domain.Club;
 import com.club.entity.domain.ClubUserMap;
 import com.club.entity.domain.FinanceDetail;
 import com.club.entity.domain.User;
+import com.club.entity.dto.balance.BalanceCountDto;
 import com.club.entity.dto.balance.ClubBalanceSaveDto;
 import com.club.entity.dto.base.PageQuery;
 import com.club.entity.enums.ClubUserStatusEnum;
 import com.club.entity.enums.FinanceDetailStatusEnum;
+import com.club.entity.vo.balance.BalanceCountVo;
 import com.club.entity.vo.club.ClubBalanceDetailVo;
 import com.club.mapper.ClubMapper;
 import com.club.mapper.FinanceDetailMapper;
@@ -23,6 +25,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -96,6 +103,67 @@ public class FinanceDetailServiceImpl extends ServiceImpl<FinanceDetailMapper, F
         financeDetail.setCreatedBy(userId);
         financeDetail.setStatus(FinanceDetailStatusEnum.AUDIT_PASS.getValue());
         save(financeDetail);
+    }
+
+    @Override
+    public BalanceCountVo getBalanceCount(BalanceCountDto balanceCountDto) {
+        // 计算日期
+        LocalDate startTime = LocalDate.parse(balanceCountDto.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate startTime2 = LocalDate.parse(balanceCountDto.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate endTime = LocalDate.parse(balanceCountDto.getEndTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        if (startTime.isAfter(endTime)) {
+            throw new GlobalException("开始时间不能大于结束时间");
+        }
+        // 循环每一天
+        List<String> countDate = new ArrayList<>();
+        while (!startTime2.isAfter(endTime)) {
+            countDate.add(startTime2.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            startTime2 = startTime2.plusDays(1);
+        }
+        // 获取期间指定的财务明细
+        List<FinanceDetail> financeDetails = this.lambdaQuery()
+                .eq(FinanceDetail::getClubId, balanceCountDto.getClubId())
+                .in(FinanceDetail::getStatus, FinanceDetailStatusEnum.AUDIT_PASS.getValue())
+                .le(FinanceDetail::getCreatedTime, LocalDateTime.of(endTime, LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .ge(FinanceDetail::getCreatedTime, LocalDateTime.of(startTime, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .list();
+        // 循环每一天
+        List<BigDecimal> expectedData = new ArrayList<>();
+        List<BigDecimal> actualData = new ArrayList<>();
+        List<BigDecimal> totalData = new ArrayList<>();
+        if (financeDetails.isEmpty()) {
+            countDate.forEach(e -> {
+                expectedData.add(BigDecimal.ZERO);
+                actualData.add(BigDecimal.ZERO);
+                totalData.add(BigDecimal.ZERO);
+            });
+            return new BalanceCountVo(expectedData, actualData, totalData, countDate);
+        }
+        BigDecimal lastTotal = BigDecimal.ZERO;
+        for (String date : countDate) {
+            List<FinanceDetail> list = financeDetails.stream().filter(e -> e.getCreatedTime().toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).equals(date)).toList();
+            // 收入
+            BigDecimal expected = BigDecimal.ZERO;
+            // 支出
+            BigDecimal actual = BigDecimal.ZERO;
+            for (FinanceDetail financeDetail : list) {
+                if (financeDetail.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    expected = expected.add(financeDetail.getAmount());
+                } else {
+                    actual = actual.add(financeDetail.getAmount().abs());
+                }
+            }
+            BigDecimal total = list.isEmpty() ? BigDecimal.ZERO : list.get(list.size() - 1).getBalance();
+            if (total.equals(BigDecimal.ZERO)) {
+                total = lastTotal;
+            } else {
+                lastTotal = total;
+            }
+            expectedData.add(expected);
+            actualData.add(actual);
+            totalData.add(total);
+        }
+        return new BalanceCountVo(expectedData, actualData, totalData, countDate);
     }
 }
 

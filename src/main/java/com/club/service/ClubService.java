@@ -135,4 +135,8 @@ public interface ClubService extends IService<Club> {
      * @return
      */
     Page<ClubUserVo> getMyClubUser(ClubQueryUserDto clubQueryUserDto, Long userId);
+
+    void exportMyClubUser(Long userId, HttpServletResponse response);
+
+    Club getMyCreateClub(Long userId);
 }

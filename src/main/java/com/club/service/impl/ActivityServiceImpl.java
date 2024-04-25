@@ -1,6 +1,6 @@
 package com.club.service.impl;
 
-import cn.hutool.db.PageResult;
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,12 +22,19 @@ import com.club.mapper.ClubMapper;
 import com.club.mapper.ClubUserMapMapper;
 import com.club.service.ActivityService;
 import com.club.service.ActivityUserMapService;
+import com.club.service.DictService;
 import com.club.service.UserService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +59,9 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
 
     @Resource
     private ClubMapper clubMapper;
+
+    @Resource
+    private DictService dictService;
 
     @Override
     public Page<ClubActivityVo> getClubNoticeList(ClubActivityQueryDto clubActivityQueryDto) {
@@ -292,6 +302,32 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
         BeanUtils.copyProperties(page, resPage, "records");
         resPage.setRecords(clubActivityUserVoList);
         return resPage;
+    }
+
+    @Override
+    public void exportActivityUserList(ClubQueryUserDto clubQueryUserDto, Long userId, HttpServletResponse response) {
+        if (clubQueryUserDto.getActivityId() == null) {
+            throw new GlobalException("活动id不能为空");
+        }
+        List<ActivityUserMap> list = activityUserMapService.lambdaQuery().eq(ActivityUserMap::getActivityId, clubQueryUserDto.getActivityId()).list();
+        List<Long> userIds = list.stream().map(ActivityUserMap::getUserId).toList();
+
+        List<User> users = userService.listByIds(userIds);
+        List<Dict> dicts = dictService.list();
+        List<UserVo> userVos = users.stream().map(item -> userService.parseUserToUserVo(item, dicts)).toList();
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode(LocalDateTime.now() + "导出活动人员列表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=" + fileName + ".xlsx");
+        try {
+            ServletOutputStream outputStream = response.getOutputStream();
+            EasyExcel.write(outputStream, UserVo.class).sheet("user").doWrite(userVos);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new GlobalException(e.getMessage(), 400);
+        }
+
     }
 }
 

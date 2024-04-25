@@ -12,6 +12,7 @@ import com.club.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -105,5 +106,11 @@ public class ClubActivityController extends BaseController {
     public Result<String> removeEntry(@RequestParam Long id) {
         activityService.removeEntry(id, getUserId());
         return Result.ok();
+    }
+
+    @PostMapping("export")
+    @Operation(summary = "导出活动报名人员")
+    public void exportActivityUser(@RequestBody @Validated ClubQueryUserDto clubQueryUserDto, HttpServletResponse response) {
+        activityService.exportActivityUserList(clubQueryUserDto, getUserId(), response);
     }
 }

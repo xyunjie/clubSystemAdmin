@@ -3,8 +3,10 @@ package com.club.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.club.entity.domain.FinanceDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.club.entity.dto.balance.BalanceCountDto;
 import com.club.entity.dto.balance.ClubBalanceSaveDto;
 import com.club.entity.dto.base.PageQuery;
+import com.club.entity.vo.balance.BalanceCountVo;
 import com.club.entity.vo.club.ClubBalanceDetailVo;
 
 /**
@@ -28,4 +30,6 @@ public interface FinanceDetailService extends IService<FinanceDetail> {
      * @param userId
      */
     void saveClubFinanceDetail(ClubBalanceSaveDto clubBalanceSaveDto, Long userId);
+
+    BalanceCountVo getBalanceCount(BalanceCountDto balanceCountDto);
 }

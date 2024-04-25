@@ -2,6 +2,7 @@ package com.club.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.club.common.result.Result;
+import com.club.entity.domain.Club;
 import com.club.entity.dto.ModifyStatusDto;
 import com.club.entity.dto.base.KeyValue;
 import com.club.entity.dto.club.ClubQueryDto;
@@ -114,4 +115,10 @@ public class ClubController extends BaseController {
         return Result.ok(res);
     }
 
+    @GetMapping("getMyClub")
+    @Operation(summary = "获取我创建的社团")
+    public Result<Club> getMyClub() {
+        Club res = clubService.getMyCreateClub(getUserId());
+        return Result.ok(res);
+    }
 }
