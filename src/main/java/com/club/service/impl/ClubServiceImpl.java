@@ -219,7 +219,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             throw new GlobalException("没有社团");
         }
         List<Long> clubIds = list.stream().map(Club::getId).toList();
-        List<ClubUserMap> clubUserMaps = clubUserMapService.lambdaQuery().in(ClubUserMap::getUserId, clubIds).list();
+        List<ClubUserMap> clubUserMaps = clubUserMapService.lambdaQuery().in(ClubUserMap::getClubId, clubIds).list();
         List<Long> userIds = new ArrayList<>(clubUserMaps.stream().map(ClubUserMap::getUserId).toList());
         userIds.add(userId);
         List<User> users = userService.listByIds(userIds);

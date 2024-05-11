@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.club.common.exception.GlobalException;
+import com.club.entity.domain.Club;
 import com.club.entity.domain.Dict;
 import com.club.entity.domain.Token;
 import com.club.entity.domain.User;
@@ -15,6 +16,7 @@ import com.club.entity.dto.user.*;
 import com.club.entity.enums.UserRoleEnum;
 import com.club.entity.enums.UserStatusEnum;
 import com.club.entity.vo.UserVo;
+import com.club.mapper.ClubMapper;
 import com.club.mapper.UserMapper;
 import com.club.service.DictService;
 import com.club.service.TokenService;
@@ -44,6 +46,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private DictService dictService;
+
+    @Resource
+    private ClubMapper clubMapper;
 
     @Override
     public String login(UserLoginDto userLoginDto) {
@@ -99,6 +104,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         UserVo userVo = new UserVo();
         BeanUtils.copyProperties(user, userVo);
+        LambdaQueryWrapper<Club> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Club::getCreatedBy, user.getId());
+        List<Club> clubs = clubMapper.selectList(queryWrapper);
+        if (!clubs.isEmpty() && userVo.getRole().equalsIgnoreCase(UserRoleEnum.USER.getValue())) {
+            userVo.setRole("clubUser");
+        }
         return userVo;
     }
 
@@ -278,7 +289,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 过滤
         List<Long> dictIdsFinal = dictIds.stream().filter(Objects::nonNull).distinct().toList();
         List<Dict> dicts = dictService.listByIds(dictIdsFinal);
-        return users.stream().map(item -> this.parseUserToUserVo(item, dicts)).toList();
+        List<Long> list = users.stream().map(User::getId).distinct().toList();
+        LambdaQueryWrapper<Club> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Club::getCreatedBy, list);
+        List<Club> clubs = clubMapper.selectList(queryWrapper);
+        List<UserVo> userVos = users.stream().map(item -> this.parseUserToUserVo(item, dicts)).toList();
+        userVos.forEach(item -> {
+            Club club = clubs.stream().filter(e -> e.getCreatedBy().equals(item.getId())).findFirst().orElse(null);
+            if (club != null && item.getRole().equalsIgnoreCase(UserRoleEnum.USER.getValue())) {
+                item.setRole("clubUser");
+            }
+        });
+        return userVos;
      }
 
     @Override
