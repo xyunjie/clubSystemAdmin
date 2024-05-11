@@ -40,7 +40,7 @@ public class ClubActivityController extends BaseController {
     @Operation(summary = "获取公告/活动列表")
     public Result<Page<ClubActivityVo>> list(@RequestBody @Validated ClubActivityQueryDto clubActivityQueryDto) {
         clubActivityQueryDto.setUserId(getUserId());
-        Page<ClubActivityVo> res = activityService.getClubNoticeList(clubActivityQueryDto);
+        Page<ClubActivityVo> res = activityService.getClubNoticeList(clubActivityQueryDto, getUserId());
         return Result.ok(res);
     }
 

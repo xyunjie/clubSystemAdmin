@@ -77,8 +77,8 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         List<ClubListVo> result = page.getRecords().stream().map(item -> {
             ClubListVo clubListVo = new ClubListVo();
             BeanUtils.copyProperties(item, clubListVo);
-            clubListVo.setCreatedUser(userMap.get(item.getCreatedBy()));
-            clubListVo.setCreatedName(userMap.get(item.getCreatedBy()).getName());
+            clubListVo.setCreatedUser(userMap.getOrDefault(item.getCreatedBy(), new User()));
+            clubListVo.setCreatedName(userMap.getOrDefault(item.getCreatedBy(), new User()).getName());
             List<ClubUserMap> userMaps = clubMap.get(item.getId());
             clubListVo.setMemberCount(userMaps == null ? 0L : userMaps.size());
             clubListVo.setStatusName(ClubStatusEnum.getDesc(item.getStatus()));
@@ -163,14 +163,13 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         List<User> userList = userService.listByIds(list);
         List<ClubUserVo> result = page.getRecords().stream().map(item -> {
             User userInfo = userList.stream().filter(user -> user.getId().equals(item.getUserId())).findFirst().orElse(null);
-            if (userInfo == null) {
-                throw new GlobalException("用户不存在");
-            }
-            UserVo userVo = userService.parseUserToUserVo(userInfo, dicts);
             ClubUserVo clubUserVo = new ClubUserVo();
-            BeanUtils.copyProperties(userVo, clubUserVo);
-            clubUserVo.setId(item.getId());
-            clubUserVo.setClubStatus(item.getStatus());
+            if (userInfo != null) {
+                UserVo userVo = userService.parseUserToUserVo(userInfo, dicts);
+                BeanUtils.copyProperties(userVo, clubUserVo);
+                clubUserVo.setId(item.getId());
+                clubUserVo.setClubStatus(item.getStatus());
+            }
             return clubUserVo;
         }).toList();
         Page<ClubUserVo> resultPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
@@ -291,6 +290,9 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             ClubBalanceDetailVo clubBalanceDetailVo = new ClubBalanceDetailVo();
             BeanUtils.copyProperties(item, clubBalanceDetailVo);
             clubBalanceDetailVo.setUserName(userMap.get(item.getCreatedBy()));
+            if (clubBalanceDetailVo.getBalance() == null) {
+                clubBalanceDetailVo.setBalance(BigDecimal.ZERO);
+            }
             return clubBalanceDetailVo;
         }).toList();
         Page<ClubBalanceDetailVo> resultPage = new Page<>();
@@ -301,7 +303,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
 
     @Override
     public void removeClubUser(ClubUserRemoveOrJoinDto clubUserRemoveDto) {
-        ClubUserMap clubUserMap = clubUserMapService.lambdaQuery().eq(ClubUserMap::getClubId, clubUserRemoveDto.getClubId()).eq(ClubUserMap::getUserId, clubUserRemoveDto.getUserId()).one();
+        ClubUserMap clubUserMap = clubUserMapService.getById(clubUserRemoveDto.getUserId());
         if (clubUserMap == null) {
             throw new GlobalException("用户不存在");
         }

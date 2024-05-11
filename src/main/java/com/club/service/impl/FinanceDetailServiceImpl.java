@@ -72,6 +72,9 @@ public class FinanceDetailServiceImpl extends ServiceImpl<FinanceDetailMapper, F
             clubBalanceDetailVo.setClubId(item.getClubId());
             clubBalanceDetailVo.setClubName(clubs.stream().filter(club -> club.getId().equals(item.getClubId())).findFirst().orElse(new Club()).getName());
             clubBalanceDetailVo.setUserName(users.stream().filter(user -> user.getId().equals(item.getCreatedBy())).findFirst().orElse(new User()).getName());
+            if (clubBalanceDetailVo.getBalance() == null) {
+                clubBalanceDetailVo.setBalance(BigDecimal.ZERO);
+            }
             return clubBalanceDetailVo;
         }).toList();
         Page<ClubBalanceDetailVo> resultPage = new Page<>(pageQuery.getPageNumber(), pageQuery.getPageSize());

@@ -35,9 +35,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,9 +62,19 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity>
     private DictService dictService;
 
     @Override
-    public Page<ClubActivityVo> getClubNoticeList(ClubActivityQueryDto clubActivityQueryDto) {
+    public Page<ClubActivityVo> getClubNoticeList(ClubActivityQueryDto clubActivityQueryDto, Long userId) {
         LambdaQueryWrapper<Activity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(clubActivityQueryDto.getId() != null, Activity::getClubId, clubActivityQueryDto.getId());
+        // 获取我的社团
+        List<ClubUserMap> clubUserMaps = clubUserMapMapper.selectList(new LambdaQueryWrapper<ClubUserMap>().eq(ClubUserMap::getUserId, userId));
+        List<Long> list = clubUserMaps.stream().map(ClubUserMap::getClubId).distinct().toList();
+        Set<Long> ids = new HashSet<>(list);
+        if (clubActivityQueryDto.getId() != null) {
+            ids.add(clubActivityQueryDto.getId());
+        }
+        if (ids.isEmpty()) {
+            return new Page<>();
+        }
+        queryWrapper.in(Activity::getClubId, ids);
         queryWrapper.eq(StringUtils.isNotEmpty(clubActivityQueryDto.getKind()), Activity::getKind, clubActivityQueryDto.getKind());
         queryWrapper.eq(clubActivityQueryDto.getStatus() != null, Activity::getStatus, clubActivityQueryDto.getStatus());
         queryWrapper.like(StringUtils.isNotEmpty(clubActivityQueryDto.getQuery()), Activity::getTitle, clubActivityQueryDto.getQuery());

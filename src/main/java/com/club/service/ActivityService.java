@@ -25,7 +25,7 @@ public interface ActivityService extends IService<Activity> {
      * @param clubActivityQueryDto
      * @return
      */
-    Page<ClubActivityVo> getClubNoticeList(ClubActivityQueryDto clubActivityQueryDto);
+    Page<ClubActivityVo> getClubNoticeList(ClubActivityQueryDto clubActivityQueryDto, Long userId);
 
     /**
      * 修改通知/活动状态
