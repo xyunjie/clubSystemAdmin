@@ -18,6 +18,7 @@ import com.club.entity.vo.UserVo;
 import com.club.entity.vo.club.ClubBalanceDetailVo;
 import com.club.entity.vo.club.ClubListVo;
 import com.club.entity.vo.club.ClubUserVo;
+import com.club.mapper.ActivityMapper;
 import com.club.mapper.ClubMapper;
 import com.club.service.*;
 import jakarta.annotation.Resource;
@@ -56,6 +57,9 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
     @Resource
     private FinanceDetailService financeDetailService;
 
+    @Resource
+    private ActivityMapper activityMapper;
+
     @Override
     public Page<ClubListVo> getClubList(ClubQueryDto clubQueryDto) {
         Page<Club> page = new Page<>(clubQueryDto.getPageNumber(), clubQueryDto.getPageSize());
@@ -76,7 +80,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             clubListVo.setCreatedUser(userMap.get(item.getCreatedBy()));
             clubListVo.setCreatedName(userMap.get(item.getCreatedBy()).getName());
             List<ClubUserMap> userMaps = clubMap.get(item.getId());
-            clubListVo.setMemberCount(userMaps == null ? 0 : userMaps.size());
+            clubListVo.setMemberCount(userMaps == null ? 0L : userMaps.size());
             clubListVo.setStatusName(ClubStatusEnum.getDesc(item.getStatus()));
             return clubListVo;
         }).toList();
@@ -247,6 +251,10 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
     public void removeClub(Long id, Long userId) {
         // 删除
         boolean b = this.removeById(id);
+        // 删除社团财务
+        financeDetailService.remove(new LambdaQueryWrapper<FinanceDetail>().eq(FinanceDetail::getClubId, id));
+        // 删除活动
+        activityMapper.delete(new LambdaQueryWrapper<Activity>().eq(Activity::getClubId, id));
         if (!b) {
             throw new GlobalException("删除失败");
         }
@@ -422,6 +430,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
             clubListVo.setCreatedName(userMap.get(item.getCreatedBy()).getName());
             clubListVo.setStatusName(ClubStatusEnum.getDesc(item.getStatus()));
             clubListVo.setJoinStatus(clubMap.get(item.getId()).getStatus());
+            clubListVo.setMemberCount(clubUserMapService.lambdaQuery().eq(ClubUserMap::getClubId, item.getId()).count());
             return clubListVo;
         }).toList();
         Page<ClubListVo> resultPage = new Page<>();
@@ -454,7 +463,7 @@ public class ClubServiceImpl extends ServiceImpl<ClubMapper, Club> implements Cl
         clubListVo.setCreatedUser(user);
         clubListVo.setCreatedName(user.getName());
         clubListVo.setStatusName(ClubStatusEnum.getDesc(club.getStatus()));
-        clubListVo.setMemberCount(count.intValue());
+        clubListVo.setMemberCount(count());
         return clubListVo;
     }
 }

@@ -63,7 +63,7 @@ public class ClubListVo {
 
     @Schema(description = "成员数")
     @ExcelProperty(value = "成员数", index = 5)
-    private Integer memberCount;
+    private Long memberCount;
 
     @Schema(description = "余额")
     @ExcelProperty(value = "余额", index = 6)
